@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To do list</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        .completed{
+            text-decoration: line-through;
+            color: darkgrey;
+
+        }
+        
+        body{
+          background-size: 1050px 570px; 
+        }
+        button {
+  display: inline-block;
+  padding: 10px 15px;
+  margin: 8px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: #a1b5f5;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 9px #999;
+}
+
+button:hover {background-color: #7aace4}
+
+button:active {
+  background-color: #9efbe5;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+       
+        
+        ul li{
+            width: 23rem;
+            height: auto;
+            margin-bottom: 10px;
+            background-color:white;
+            border-radius: 2px;
+            padding: 1rem;
+            box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+        }
+       
+        #f2{
+            border: 1px;
+            border-radius: 0.5px;
+            color: black;
+            text-decoration: none;
+            background-color:coral; 
+        }
+        .high {
+        background-color: rgb(247, 82, 82);
+        }
+        .medium {
+         background-color:#ed9da0
+        }
+        .low {
+        background-color:rgb(211, 155, 215);
+        }
+        body{
+            background-image: linear-gradient(to top, #a6c0fe, #f68084);
+        }
+        #app{
+            background-color: white;
+            border: 2px solid rgb(129, 128, 124);
+            border-radius: 18px;
+            width: 600px;
+            height: 430px;
+            position: absolute;
+            text-align:center;
+            margin-left: 280px;
+            margin-top: 50px;
+        }
+        
+    </style>
+</head>
+<body onload="show()">
+    <div id="app">
+        <span style="font-size: 30px;">To do list</span><br><br><div id="nowTime"></div>
+        <span style="font-size: 20px; margin-right: 10px;">Today's issue:&ensp;</span>
+        <input style="padding: 8px 20px;" type="text" v-model="newitem" placeholder="Enter a new task" @keyup.enter="add()">
+       <br>
+         <label class="todo-label" >Select Urgency level:&ensp;&ensp;&ensp;</label>
+         <select class="todo-drop" v-model="value" @onchange="add()">
+                    <option value="high">High Urgency</option>
+                    <option value="medium">Medium Urgency</option>
+                    <option value="low">Low Urgency</option>
+        </select>
+          <ul>
+               <li class="item-text" style="list-style-type: square;padding: 5px;margin-left: 35px;line-height: 5px;" v-for="(item,index) in items"  :class="{'completed':item.isCompleted, 'high': item.urgency === 'high', 'medium': item.urgency === 'medium', 'low': item.urgency === 'low'}"  v-show="!item.isCompleted || showCompleted">
+                   <input type="checkbox" v-model="item.isCompleted">
+                   <span v-if="item !== itemEdited" @click="editItem(item)">{{ item.text }}</span>
+                   
+                   <input v-else v-model="item.text" @keyup.enter="doneEditing()" type="text" />
+                   <input style="margin-left: 70px;" type="button" value="×" @click="remove(index)">
+                   
+                   <span class="badge badge-success badge-pill" v-if='item.isCompleted'><img style="width: 30px;height: 25px;padding-top: 3px;margin-left: 40px;" src="1.jpg" alt=""></span>
+                   <span class="badge badge-warning badge-pill" v-else><img style="width: 30px;height: 25px;padding-top: 3px;margin-left: 30px;" src="2.jpg" alt=""></span>
+                   
+                   
+               </li>
+           </ul>
+           <span>todo<span>&ensp;{{not()}}</span></span>
+           <span style="margin-left: 20px;">finished<span>&ensp;{{finish()}}</span></span><br>
+           <button @click="showCompleted=!showCompleted"> {{showCompleted ? "Hide" : "Show"}}Completed</button>
+           <button @click="delcompleted()">Delete Completed</button>
+       
+      
+    </div>
+    
+    <script>
+      
+        function show(){
+            var date = new Date(); 
+            var now = "";
+            now = date.getFullYear()+"-"; 
+            now = now + (date.getMonth()+1)+"-"; 
+            now = now + date.getDate();
+            now = now + date.getHours()+":";
+            now = now + date.getMinutes()+":";
+            now = now + date.getSeconds();
+            document.getElementById("nowTime").innerHTML = now; 
+            setTimeout("show()",1000); 
+        }
+        
+        const app=Vue.createApp({
+            data(){
+                return{
+                    items:[
+                        {text:"have a meeting",isCompleted:false,urgency:'medium'},
+                        {text:"swim class",isCompleted:true,urgency:'high'},
+                        {text:"go shopping",isCompleted:false,urgency:'low'}
+                    ],
+                    value:"",
+                    newitem:"",
+                    showCompleted:true,
+                    finished:[],
+                    itemEdited: null,
+                    
+                    
+                    
+                    }
+                    },
+                    computed:{
+                        undolist(){
+                            return this.items.filter(item=>!item.isCompleted)
+                        },
+                        dolist(){
+                            return this.items.filter(item=>item.isCompleted)
+                        }
+
+                    },
+                    methods:{
+                       
+                        not(){
+                            let not=this.undolist.length;
+                            return not
+                        },
+                        finish(){
+                            let finish =this.dolist.length;
+                            return finish;
+                        },
+                        editItem: function (item) {
+                            this.itemEdited = item;
+                        },
+                        doneEditing: function () {
+                            this.itemEdited = null;
+                        },
+                       set(){
+                        this.items.push({urgency:this.value});
+                       },
+                        add(){
+                            
+                            this.items.push({text:this.newitem,urgency:this.value});
+                            this.newitem="";
+                            if(this.showCompleted){
+                                text="Hide"
+                            }else{
+                                text="Show"
+                            }
+                            text+"Completed" 
+                        },
+                    remove(index){
+                        this.items.splice(index,1)
+                    },
+                    delcompleted(){
+                        
+                        //for (var i = 0; i < this.items.length; i++) {
+                          // if (this.items[i].isCompleted==true) {
+                                //  this.finished.push(this.items[i].index)
+                      //  }
+                         //for (var j = 0; j < this.finished.length; j++) {
+                            // this.items.splice(this.finished[j], 1)
+
+                        //}
+                   // }
+                   let unfinished=[]
+                   this.items.forEach(item => {
+                       if(!item.isCompleted){
+                           unfinished.push(item)
+                       }
+                       
+                   });
+                   return this.items=unfinished
+                },}
+        })
+
+        app.mount("#app")
+    </script>
+</body>
+</html>

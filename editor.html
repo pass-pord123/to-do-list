@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Simple Editor</title>
+    
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div v-for="item,index in items">
+            <span v-if="item !== itemEdited" @click="editItem(item)">{{ item.text }}</span>
+            <input v-else v-model="item.text" @keyup.enter="doneEditing()" type="text" />
+        </div>
+    </div>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    items: [{ text: "click to edit me" }, { text: "same as above" }],
+                    itemEdited: null
+                }
+            },
+            methods: {
+                editItem: function (item) {
+                    this.itemEdited = item;
+                },
+                doneEditing: function () {
+                    this.itemEdited = null;
+                }
+            }
+        });
+        app.mount("#app");
+    </script>
+</body>
+
+</html>
